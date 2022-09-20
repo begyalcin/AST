@@ -132,36 +132,42 @@ class CLEVRTEX:
         met_suffix = ".json"
 
         _max = 0
-        for img_path in self.basepath.glob(f'**/{prefix}??????{img_suffix}'):
+        images = list(self.basepath.glob(f'**/{prefix}??{img_suffix}')) + list(self.basepath.glob(f'**/{prefix}???{img_suffix}')) + list(self.basepath.glob(f'**/{prefix}????{img_suffix}')) 
+        for img_path in images:
             indstr = img_path.name.replace(prefix, '').replace(img_suffix, '')
+            print(img_path.name)
+            print(indstr)
             msk_path = img_path.parent / f"{prefix}{indstr}{msk_suffix}"
             met_path = img_path.parent / f"{prefix}{indstr}{met_suffix}"
             indstr_stripped = indstr.lstrip('0')
+            print(indstr_stripped)
+           
             if indstr_stripped:
                 ind = int(indstr)
             else:
                 ind = 0
             if ind > _max:
                 _max = ind
-
+            
             if not msk_path.exists():
                 raise DatasetReadError(f"Missing {msk_suffix.name}")
 
             if ind in img_index:
                 raise DatasetReadError(f"Duplica {ind}")
-
+            
             img_index[ind] = img_path
             msk_index[ind] = msk_path
+            
             if self.return_metadata:
                 if not met_path.exists():
                     raise DatasetReadError(f"Missing {met_path.name}")
                 met_index[ind] = met_path
             else:
                 met_index[ind] = None
-
+        print(img_index)
         if len(img_index) == 0:
             raise DatasetReadError(f"No values found")
-        missing = [i for i in range(0, _max) if i not in img_index]
+        missing = [i for i in range(1, _max) if i not in img_index]
         if missing:
             raise DatasetReadError(f"Missing images numbers {missing}")
 
